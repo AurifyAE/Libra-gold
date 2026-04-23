@@ -166,6 +166,7 @@ const WorldClockHorizontal = () => {
               style={{ width: "100%" }}
             />
           </Box>
+        
 
           {/* LABEL */}
           <Typography sx={{ color: "#fff", fontWeight: 500 }}>

@@ -34,6 +34,16 @@ const CommodityTable = ({ title, items }) => {
     return null;
   };
 
+  const toNumber = (value) => {
+    if (value == null) return 0;
+    if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+    const raw = String(value).trim();
+    if (!raw) return 0;
+    const cleaned = raw.replace(/,/g, "");
+    const n = parseFloat(cleaned);
+    return Number.isFinite(n) ? n : 0;
+  };
+
   const purityFactor = (purity) =>
     purity ? purity / 10 ** String(purity).length : 1;
 
@@ -52,37 +62,74 @@ const CommodityTable = ({ title, items }) => {
     });
   };
 
+  // ✅ Build rows with fallback
+  // const rows =
+  //   items
+  //     ?.map((item) => {
+  //       const spot = getSpot(item.metal);
+
+  //       // 🔥 fallback important
+  //       const effectiveSpot = spot || goldData;
+  //       if (!effectiveSpot) return null;
+
+  //       const mult = UNIT_MULTIPLIER[item.weight] || 1;
+  //       const pur = purityFactor(item.purity);
+
+  //       const baseBid =
+  //         (effectiveSpot.bid / OUNCE) * AED * mult * item.unit * pur;
+
+  //       const baseAsk =
+  //         (effectiveSpot.ask / OUNCE) * AED * mult * item.unit * pur;
+
+  //       return {
+  //         purity: item.purity,
+  //         metal: item.metal,
+  //         unit: `${item.unit} ${item.weight}`,
+  //         bid:
+  //           baseBid +
+  //           (Number(item.buyCharge) || 0) +
+  //           (Number(item.buyPremium) || 0),
+  //         ask:
+  //           baseAsk +
+  //           (Number(item.sellCharge) || 0) +
+  //           (Number(item.sellPremium) || 0),
+  //       };
+  //     })
+  //     .filter(Boolean) ?? [];
+
   const rows =
     items
       ?.map((item) => {
         const spot = getSpot(item.metal);
+        if (!spot) return null;
 
-        // 🔥 IMPORTANT: fallback to goldData
-        const effectiveSpot = spot || goldData;
-        if (!effectiveSpot) return null;
+        const multiplier = UNIT_MULTIPLIER[item.weight] || 1;
+        const purity = purityFactor(item.purity);
+        const unitValue = toNumber(item.unit) || 1;
 
-        const mult = UNIT_MULTIPLIER[item.weight] || 1;
-        const pur = purityFactor(item.purity);
-        const unitValue = Number(item.unit) || 1;
+        const spotBid = toNumber(spot.bid);
+        const spotAsk = toNumber(spot.ask);
 
+        const buyPremium = toNumber(item.buyPremium);
+        const sellPremium = toNumber(item.sellPremium);
+
+        // Premiums are applied at spot-level (USD/oz), then converted to AED
         const baseBid =
-          (effectiveSpot.bid / OUNCE) * AED * mult * unitValue * pur;
-
+          ((spotBid + buyPremium) / OUNCE) * AED * multiplier * unitValue * purity;
         const baseAsk =
-          (effectiveSpot.ask / OUNCE) * AED * mult * unitValue * pur;
+          ((spotAsk + sellPremium) / OUNCE) * AED * multiplier * unitValue * purity;
+
+        const bid = baseBid + toNumber(item.buyCharge);
+        const ask = baseAsk + toNumber(item.sellCharge);
+
+        const isTenTola = item.metal === "Gold Ten TOLA";
 
         return {
-          purity: item.purity,
-          metal: item.metal,
+          name: isTenTola ? "Gold" : item.metal,
+          purity: isTenTola ? "TEN TOLA" : item.purity,
           unit: `${unitValue} ${item.weight}`,
-          bid:
-            baseBid +
-            (Number(item.buyCharge) || 0) +
-            (Number(item.buyPremium) || 0),
-          ask:
-            baseAsk +
-            (Number(item.sellCharge) || 0) +
-            (Number(item.sellPremium) || 0),
+          bid,
+          ask,
         };
       })
       .filter(Boolean) ?? [];
@@ -105,18 +152,20 @@ const CommodityTable = ({ title, items }) => {
 
   return (
     <Box sx={{ width: "100%", overflow: "hidden" }}>
+     
+
       <Box
         sx={{
           display: "grid",
           gridTemplateColumns: "1.4fr 0.8fr 0.8fr 0.8fr",
-          py: "0.9vw",
+          py: "0.5vw",
           px: "1.5vw",
+          borderRadius: "0.5vw",
           alignItems: "end",
-          borderRadius: "1vw",
-          background: "#f7e4d300",
+          borderRadius: "0.8vw",
           backdropFilter: "blur(0.3vw)",
-          border: "0.1vw solid #ffffff4a",
-          margin: ".4vw",
+          border: "0.1vw solid #DDFDFF59",
+          background: "#A08038",
         }}
       >
         <Typography
@@ -125,10 +174,10 @@ const CommodityTable = ({ title, items }) => {
             fontSize: {
               xs: "14px",
               lg: "1.2vw",
-              xl: "1.3vw",
+              xl: "1.5vw",
             },
             fontWeight: 600,
-            color: "#fff",
+            color: "#FFFFFF",
             letterSpacing: "0.04vw",
             textAlign: "start",
           }}
@@ -142,10 +191,10 @@ const CommodityTable = ({ title, items }) => {
             fontSize: {
               xs: "14px",
               lg: "1.2vw",
-              xl: "1.3vw",
+              xl: "1.5vw",
             },
             fontWeight: 600,
-            color: "#fff",
+            color: "#FFFFFF",
             textAlign: "start",
           }}
         >
@@ -157,14 +206,15 @@ const CommodityTable = ({ title, items }) => {
             fontSize: {
               xs: "14px",
               lg: "1.2vw",
-              xl: "1.3vw",
+              xl: "1.5vw",
             },
             fontWeight: 600,
-            color: "#fff",
+            color: "#FFFFFF",
             textAlign: "center",
           }}
         >
           BID
+
         </Typography>
 
         <Typography
@@ -173,21 +223,22 @@ const CommodityTable = ({ title, items }) => {
             fontSize: {
               xs: "14px",
               lg: "1.2vw",
-              xl: "1.3vw",
+              xl: "1.5vw",
             },
             fontWeight: 600,
-            color: "#fff",
+            color: "#FFFFFF",
             textAlign: "center",
           }}
         >
           ASK
+
         </Typography>
       </Box>
 
       <Box
         sx={{
+          maxHeight: { xs: "auto", sm: "20vw" },
           mt: "1vw",
-          maxHeight: { xs: "auto", sm: "18vw" },
         }}
       >
         {rows.length === 0 ? (
@@ -205,6 +256,7 @@ const CommodityTable = ({ title, items }) => {
           <Swiper
             direction="vertical"
             slidesPerView={4}
+            spaceBetween={10}
             loop={true}
             modules={[Autoplay]} // 👈 Register it here
             autoplay={{
@@ -213,17 +265,8 @@ const CommodityTable = ({ title, items }) => {
             }}
             speed={3000} // 👈 higher = smoother slow scroll
             // allowTouchMove={false} // important for TV
-            style={{
-              height: isMobile ? "35vw" : "18vw",
-
-              backdropFilter: "blur(5px)",
-              background: "#f7e4d300",
-              borderRadius: "1vw",
-              border: "0.1vw solid #ffffff4a",
-              margin: ".4vw",
-            }}
+            style={{ height: isMobile ? "22vw" : "19vw" }}
           >
-            «
             {rows.map((row, index) => (
               <SwiperSlide key={index}>
                 <Box
@@ -232,9 +275,11 @@ const CommodityTable = ({ title, items }) => {
                     display: "grid",
                     gridTemplateColumns: "1.4fr 0.8fr 0.8fr 0.8fr",
                     alignItems: "center",
-                    py: ".7vw",
-                    px: "1.5vw",
+                    borderRadius: ".5vw",
+                    py: ".5vw",
                     height: "100%",
+                    px: "1.5vw",
+                    border: "1px solid rgba(255, 255, 255, 0.3)", // 👈 mild bg
                   }}
                 >
                   <Typography
@@ -244,10 +289,10 @@ const CommodityTable = ({ title, items }) => {
                         xs: "14px",
                         sm: "12px",
                         lg: "1.6vw",
-                        xl: "1.4vw",
+                        xl: "1.5vw",
                       },
                       fontWeight: 800,
-                      color: "#fff",
+                      color: "#FFFFFF",
                       display: "flex",
                       alignItems: "center ",
                       justifyContent: "start",
@@ -257,7 +302,7 @@ const CommodityTable = ({ title, items }) => {
                       },
                     }}
                   >
-                    {row.metal}
+                    {row.name}
                     <Typography
                       sx={{
                         // fontSize: "1vw",
@@ -267,7 +312,7 @@ const CommodityTable = ({ title, items }) => {
                           lg: "1.2vw",
                         },
                         fontWeight: 400,
-                        color: "#fff",
+                        color: "#FFFFFF",
                         // mb:'-0.5vw'
                       }}
                     >
@@ -281,9 +326,9 @@ const CommodityTable = ({ title, items }) => {
                       fontSize: {
                         xs: "14px",
                         lg: "1.3vw",
-                        xl: "1.4vw",
+                        xl: "1.5vw",
                       },
-                      color: "#fff",
+                      color: "#FFFFFF",
                       textAlign: "start",
                     }}
                   >
@@ -296,10 +341,10 @@ const CommodityTable = ({ title, items }) => {
                       fontSize: {
                         xs: "14px",
                         lg: "1.5vw",
-                        xl: "1.4vw",
+                        xl: "1.5vw",
                       },
                       fontWeight: 600,
-                      color: "#fff", // soft pink ASK
+                      color: "#FFFFFF", // soft pink ASK
                     }}
                   >
                     {formatPrice(row.bid)}
@@ -311,10 +356,10 @@ const CommodityTable = ({ title, items }) => {
                       fontSize: {
                         xs: "14px",
                         lg: "1.5vw",
-                        xl: "1.4vw",
+                        xl: "1.5vw",
                       },
                       fontWeight: 600,
-                      color: "#fff", // soft pink ASK
+                      color: "#FFFFFF", // soft pink ASK
                     }}
                   >
                     {formatPrice(row.ask)}

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Grid, Paper, Typography, Box, useMediaQuery } from "@mui/material";
 import SpotRate from "../components/SpotRate";
 import CommodityTable from "../components/CommodityTable";
@@ -38,21 +38,19 @@ function TvScreen() {
 
   const adminId = import.meta.env.VITE_APP_ADMIN_ID;
 
-  // updateMarketData(
-  //   marketData,
-  //   goldBidSpread,
-  //   goldAskSpread,
-  //   silverBidSpread,
-  //   silverAskSpread,
-  // );
+  const marketDataRef = useRef({});
+  const flushTimerRef = useRef(null);
+
   useEffect(() => {
-    updateMarketData(
-      marketData,
-      goldBidSpread,
-      goldAskSpread,
-      silverBidSpread,
-      silverAskSpread,
-    );
+    if (marketData && Object.keys(marketData).length > 0) {
+      updateMarketData(
+        marketData,
+        goldBidSpread,
+        goldAskSpread,
+        silverBidSpread,
+        silverAskSpread,
+      );
+    }
   }, [
     marketData,
     goldBidSpread,
@@ -60,6 +58,7 @@ function TvScreen() {
     silverBidSpread,
     silverAskSpread,
   ]);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -125,46 +124,31 @@ function TvScreen() {
       });
 
       socket.on("connect", () => {
+        console.log("Connected to WebSocket server");
         socket.emit("request-data", symbols);
       });
 
-      socket.on("disconnect", () => { });
-
-      // socket.on("market-data", (data) => {
-      //   if (data && data.symbol) {
-      //     setMarketData((prevData) => ({
-      //       ...prevData,
-      //       [data.symbol]: {
-      //         ...prevData[data.symbol],
-      //         ...data,
-      //       },
-      //     }));
-      //   } else {
-      //     console.warn("Received malformed market data:", data);
-      //   }
-      // });
+      socket.on("disconnect", () => {
+        console.log("Disconnected from WebSocket server");
+      });
 
       socket.on("market-data", (data) => {
-        if (Array.isArray(data)) {
-          data.forEach((item) => {
-            if (item.symbol) {
-              setMarketData((prev) => ({
-                ...prev,
-                [item.symbol]: {
-                  ...prev[item.symbol],
-                  ...item,
-                },
-              }));
-            }
-          });
-        } else if (data && data.symbol) {
-          setMarketData((prev) => ({
-            ...prev,
+        if (data && data.symbol) {
+          marketDataRef.current = {
+            ...marketDataRef.current,
             [data.symbol]: {
-              ...prev[data.symbol],
+              ...(marketDataRef.current[data.symbol] || {}),
               ...data,
             },
-          }));
+          };
+
+          // Throttle UI updates for TV/low-power browsers
+          if (!flushTimerRef.current) {
+            flushTimerRef.current = setTimeout(() => {
+              flushTimerRef.current = null;
+              setMarketData(marketDataRef.current);
+            }, 250);
+          }
         } else {
           console.warn("Received malformed market data:", data);
         }
@@ -177,22 +161,14 @@ function TvScreen() {
 
       // Cleanup function to disconnect the socket
       return () => {
+        if (flushTimerRef.current) {
+          clearTimeout(flushTimerRef.current);
+          flushTimerRef.current = null;
+        }
         socket.disconnect();
       };
     }
   }, [serverURL, symbols]);
-
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkWidth = () => {
-      setIsMobile(window.screen.width <= 768); // 🔥 screen.width ignores zoom
-    };
-
-    checkWidth();
-    window.addEventListener("resize", checkWidth);
-    return () => window.removeEventListener("resize", checkWidth);
-  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
