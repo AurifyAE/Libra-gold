@@ -10,6 +10,7 @@ import "swiper/css/autoplay";
 const OUNCE = 31.103;
 const AED = 3.674;
 
+
 const UNIT_MULTIPLIER = {
   GM: 1,
   KG: 1000,
