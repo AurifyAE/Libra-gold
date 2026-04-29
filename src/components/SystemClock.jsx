@@ -59,7 +59,7 @@ const SystemClock = () => {
         sx={{
           fontSize: {
             xs: "14px",
-            sm: "2.5vw",
+            sm: "3vw",
           },
           fontWeight: 800,
           color: "#A08038",
@@ -75,7 +75,7 @@ const SystemClock = () => {
         sx={{
           fontSize: {
             xs: "12px",
-            sm: "1vw",
+            sm: "1.5vw",
           },
           fontWeight: 700,
           letterSpacing: "2px",
@@ -89,7 +89,7 @@ const SystemClock = () => {
         sx={{
           fontSize: {
             xs: "12px",
-            sm: "1.4vw",
+            sm: "2vw",
           },
           fontWeight: 500,
           color: "#A08038",

@@ -265,7 +265,7 @@ function TvScreen() {
             <Box
               sx={{
                 height: "auto",
-                width: { sm: "18vw" },
+                width: { sm: "24vw" },
               }}
             >
               <img src={mainLogo} alt="" className="object-contain w-full" />
