@@ -181,10 +181,10 @@ const SpotRate = () => {
       <Box
         sx={{
           border: "0.1vw solid #ffffff4a",
-          borderRadius: "1vw",
+          borderRadius: { xs: "3vw", sm: "1vw" },
           backdropFilter: "blur(0.2vw)",
           background: "#f7e4d300",
-          padding: { xs: " 2vw 3vw", sm: " 0.5vw 2vw", md: "1vw 1vw" },
+          padding: { xs: " 4vw 3vw", sm: " 0.5vw 2vw", md: "1vw 1vw" },
           display: "grid",
           alignItems: "center",
           gap: "1vw",
@@ -201,25 +201,25 @@ const SpotRate = () => {
         >
           <Box
             sx={{
-              width: "4.5vw",
-              height: "4.5vw",
-              objectFit: "contain", 
+              width: { xs: '10vw', sm: '4.5vw' },
+              height: { xs: '10vw', sm: '4.5vw' },
+              objectFit: "contain",
             }}
             component='img'
             src={isSilver ? '/images/silver-bar.png' : '/images/gold-bar.png'}
             alt={title}
           />
-            
+
           <Box
             sx={{
               fontSize: { xs: "14px", md: "1.7vw" },
               fontWeight: 700,
-               
+
               letterSpacing: "0.1em",
-              background:isSilver?'linear-gradient(90deg, #CCFBFF,#9AC6FF)':'linear-gradient(90deg, #FFF7CC,#FFCD9A)',
+              background: isSilver ? 'linear-gradient(90deg, #CCFBFF,#9AC6FF)' : 'linear-gradient(90deg, #FFF7CC,#FFCD9A)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              lineHeight:'1'
+              lineHeight: '1'
 
             }}
           >
@@ -271,7 +271,7 @@ const SpotRate = () => {
     <Box
       sx={{
         display: "grid",
-        gap: "1vw",
+        gap: { xs: '3vw', sm: '1vw' },
         width: "100%",
         alignItems: "end",
         marginTop: {

@@ -20,7 +20,7 @@ const clockConfig = [
     timeZone: "Africa/Ndjamena", // ✅ correct timezone
     flag: "/images/chad.png",
   },
-  
+
 ];
 
 
@@ -135,11 +135,12 @@ const WorldClockHorizontal = () => {
         justifyContent: "space-evenly",
         alignItems: "center",
         width: "100%",
-        padding: "1vw 0",
+        padding: { xs: '4vw 0', sm: "1vw 0" },
         border: "0.1vw solid #ffffff4a",
-        borderRadius: "1vw",
-        backdropFilter: "blur(0.2vw)",
+        borderRadius: { xs: "4vw", sm: "1vw" },
+        backdropFilter: { xs: 'blur(10px)', sm: "blur(0.2vw)" },
         background: "#f7e4d300",
+
       }}
     >
       {clockConfig.map((clock) => (
@@ -150,7 +151,7 @@ const WorldClockHorizontal = () => {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: "10px",
+            gap: { xs: '7px', sm: "10px" },
           }}
         >
           {/* FLAG */}
@@ -161,15 +162,15 @@ const WorldClockHorizontal = () => {
               style={{ width: "100%" }}
             />
           </Box>
-        
+
 
           {/* LABEL */}
-          <Typography sx={{ color: "#fff", fontWeight: 500 }}>
+          <Typography sx={{ color: "#fff", fontWeight: 500, lineHeight: '1' }}>
             {clock.label}
           </Typography>
 
           {/* DIGITAL TIME */}
-          <Typography sx={{ color: "#fff" }}>
+          <Typography sx={{ color: "#fff", lineHeight: '1' }}>
             {times[clock.key]
               ? times[clock.key].toLocaleTimeString("en-US", {
                 hour: "2-digit",

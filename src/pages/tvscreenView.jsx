@@ -238,8 +238,12 @@ function TvScreen() {
           justifyContent="spaceBetween"
           padding="1vw"
           marginBottom="0.5vw"
-          gap="1vw"
-        >
+          sx={{
+            gap: {
+              xs: "10px",
+              sm: "1vw",
+            },
+          }} >
 
           <SpotRate />
           <WorldClockHorizontal />
@@ -259,13 +263,14 @@ function TvScreen() {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              width: "100%"
+              width: "100%",
+              py: { xs: '20px', sm: '0' }
             }}
           >
             <Box
               sx={{
                 height: "auto",
-                width: { sm: "24vw" },
+                width: { xs: '35vw', sm: "24vw" },
               }}
             >
               <img src={mainLogo} alt="" className="object-contain w-full" />

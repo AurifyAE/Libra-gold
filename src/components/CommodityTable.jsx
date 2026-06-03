@@ -63,41 +63,6 @@ const CommodityTable = ({ title, items }) => {
     });
   };
 
-  // ✅ Build rows with fallback
-  // const rows =
-  //   items
-  //     ?.map((item) => {
-  //       const spot = getSpot(item.metal);
-
-  //       // 🔥 fallback important
-  //       const effectiveSpot = spot || goldData;
-  //       if (!effectiveSpot) return null;
-
-  //       const mult = UNIT_MULTIPLIER[item.weight] || 1;
-  //       const pur = purityFactor(item.purity);
-
-  //       const baseBid =
-  //         (effectiveSpot.bid / OUNCE) * AED * mult * item.unit * pur;
-
-  //       const baseAsk =
-  //         (effectiveSpot.ask / OUNCE) * AED * mult * item.unit * pur;
-
-  //       return {
-  //         purity: item.purity,
-  //         metal: item.metal,
-  //         unit: `${item.unit} ${item.weight}`,
-  //         bid:
-  //           baseBid +
-  //           (Number(item.buyCharge) || 0) +
-  //           (Number(item.buyPremium) || 0),
-  //         ask:
-  //           baseAsk +
-  //           (Number(item.sellCharge) || 0) +
-  //           (Number(item.sellPremium) || 0),
-  //       };
-  //     })
-  //     .filter(Boolean) ?? [];
-
   const rows =
     items
       ?.map((item) => {
@@ -135,11 +100,19 @@ const CommodityTable = ({ title, items }) => {
       })
       .filter(Boolean) ?? [];
 
-  const [isMobile, setIsMobile] = useState(false);
+  const [screenSize, setScreenSize] = useState("desktop");
 
   useEffect(() => {
     const checkWidth = () => {
-      setIsMobile(window.innerWidth <= 768);
+      const width = window.innerWidth;
+
+      if (width < 700) {
+        setScreenSize("mobile");
+      } else if (width < 900) {
+        setScreenSize("tablet");
+      } else {
+        setScreenSize("desktop");
+      }
     };
 
     checkWidth();
@@ -148,18 +121,41 @@ const CommodityTable = ({ title, items }) => {
     return () => window.removeEventListener("resize", checkWidth);
   }, []);
 
+  const swiperConfig = {
+    mobile: {
+      slidesPerView: 4,
+      spaceBetween: 5,
+      height: "200px",
+      speed: 2500,
+    },
+    tablet: {
+      slidesPerView: 5,
+      spaceBetween: 8,
+      height: "320px",
+      speed: 3000,
+    },
+    desktop: {
+      slidesPerView: 4,
+      spaceBetween: 10,
+      height: "19vw",
+      speed: 3500,
+    },
+  };
+
+  const current = swiperConfig[screenSize];
+
   // ❌ No data → don't render section
   if (!rows.length) return null;
 
   return (
     <Box sx={{ width: "100%", overflow: "hidden" }}>
-     
+
 
       <Box
         sx={{
           display: "grid",
           gridTemplateColumns: "1.4fr 0.8fr 0.8fr 0.8fr",
-          py: "0.5vw",
+          py: { xs: '10px', sm: "0.5vw" },
           px: "1.5vw",
           borderRadius: "0.5vw",
           alignItems: "end",
@@ -238,7 +234,7 @@ const CommodityTable = ({ title, items }) => {
 
       <Box
         sx={{
-          maxHeight: { xs: "auto", sm: "20vw" },
+          maxHeight: { xs: current.height },
           mt: "1vw",
         }}
       >
@@ -256,17 +252,16 @@ const CommodityTable = ({ title, items }) => {
         ) : (
           <Swiper
             direction="vertical"
-            slidesPerView={4}
-            spaceBetween={10}
-            loop={true}
-            modules={[Autoplay]} // 👈 Register it here
+            slidesPerView={current.slidesPerView}
+            spaceBetween={current.spaceBetween}
+            loop
+            modules={[Autoplay]}
             autoplay={{
               delay: 0,
               disableOnInteraction: false,
             }}
-            speed={3000} // 👈 higher = smoother slow scroll
-            // allowTouchMove={false} // important for TV
-            style={{ height: isMobile ? "22vw" : "19vw" }}
+            speed={current.speed}
+            style={{ height: current.height }}
           >
             {rows.map((row, index) => (
               <SwiperSlide key={index}>

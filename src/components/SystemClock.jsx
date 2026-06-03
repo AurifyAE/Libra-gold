@@ -62,7 +62,8 @@ const SystemClock = () => {
             sm: "3vw",
           },
           fontWeight: 800,
-          color: "#A08038",
+          color: { xs: 'white', sm: "#A08038" },
+
           letterSpacing: "2px",
           lineHeight: "1.2",
         }}
@@ -79,7 +80,8 @@ const SystemClock = () => {
           },
           fontWeight: 700,
           letterSpacing: "2px",
-          color: "#A08038",
+          color: { xs: 'white', sm: "#A08038" },
+
         }}
       >
         {timeData.date || "-- --- ----"}
@@ -92,7 +94,7 @@ const SystemClock = () => {
             sm: "2vw",
           },
           fontWeight: 500,
-          color: "#A08038",
+          color: { xs: 'white', sm: "#A08038" },
           letterSpacing: "2px",
         }}
       >
